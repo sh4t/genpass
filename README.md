@@ -1,6 +1,6 @@
 genpass
 ====
-An OSX utility for generating passwords out of real words containing within the location dictionary file `/usr/share/dict/words`.
+An OSX utility (SHELL script) for generating passwords out of real words containing within the location dictionary file `/usr/share/dict/words`.
 
 
 Usage
