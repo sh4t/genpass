@@ -1,7 +1,7 @@
 install:
-	# create a symlink
+	# link
 	ln -s $(CURDIR)/genpass /usr/local/bin/genpass
 
 uninstall:
-	# remove symlink
+	# unlink
 	rm /usr/local/bin/genpass
