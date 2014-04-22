@@ -1,0 +1,102 @@
+#!/bin/sh 
+#
+# genpass: 	generate password from random words contained within
+# 			local word dictionary, allowing user to specify word
+#			length as well as number of words used in password.
+#
+# Created: 	Mon Apr 21 2014 (2014-04-21) by Justin Shattuck <justinshattuck@gmail.com>
+#
+# Copyright 2014 Justin Shattuck (justinshattuck@gmail.com)
+#
+# 			May be freely distributed, modified, and used for 
+#			personal and commercial purposes as long as original 
+#			copyright is retained. MIT-LCENSE, see LICENSE file.
+#
+VERSION=0.0.1
+
+# Word count
+NUM_WORDS=`cat /usr/share/dict/words | wc -l`;
+
+usage() {
+cat << EOF
+Usage: genpass [OPTIONS] [WORD LENGTH (6)]
+
+Options:
+    -h, --help      Help as expected
+    -v, --version   Display version info
+    -a, --about     Useless info
+    -s, --stats     Stats from word dictionary
+EOF
+}
+
+for arg
+do
+  delim=""
+  case "$arg" in
+    --help) args="${args}-h ";;
+    --version) args="${args}-v ";;
+	--about) args="${args}-a ";;
+	--stats) args="${args}-s ";;
+    *) [[ "${arg:0:1}" == "-" ]] || delim="\""
+      args="${args}${delim}${arg}${delim} ";;
+  esac
+done
+eval set -- $args
+
+# Parse command arguments
+while getopts "hvas" option; do
+  case "$option" in
+    h)
+      usage
+      exit 0;;
+    v)
+      echo "`basename $0` $VERSION"
+      exit 0;;
+	a)
+	  echo "About:"
+	  echo "`basename $0` is an utility for generating random passwords"
+	  echo "containing real words from a local dictionary file.\n"
+	  echo "Created by Justin Shattuck <justinshattuck@gmail.com>"
+	  exit 0;;
+	s)
+	  echo "Stats:"
+	  echo "${NUM_WORDS} words available within local dictionary.\n"
+	  exit 0;;
+    # getopts issues an error message
+    \?)
+      usage >&2
+      exit 1;;
+  esac
+done
+
+
+# set word length
+WORD_LENGTH=$1
+: ${WORD_LENGTH:="6"}
+
+# fetch a random word from local dictionary that is less than $1 (default 6) characters in length
+# convert the word to Camel Case for added entropy
+random_word(){
+	WORD=$(head -n`jot -r 1 1 $NUM_WORDS` /usr/share/dict/words | awk -v wordlength=$WORD_LENGTH 'length < wordlength' | tail -n1);
+	echo $(tr '[:lower:]' '[:upper:]' <<< ${WORD:0:1})${WORD:1}
+}
+
+# random number
+random_number(){
+	NUM=$(jot -r 1 1 99);
+	echo $NUM
+}
+
+# random char set
+random_character(){
+	CHARSET=( '!' '@' '#' '$' '%' '^' '&' '*' '-' '_' '=' '+' ']' '[' '}' '{' ':' ';' '"' '.' ',' '<' '>' '?' );
+	# get a random character
+	CHAR=${CHARSET[$(jot -r 1 1 ${#CHARSET[*]})]};
+	echo $CHAR
+}
+
+TEMPPASS=$(random_word)$(random_word)$(random_number)$(random_word)$(random_character);
+
+# stdout and clipboard
+echo $TEMPPASS
+echo $TEMPPASS | pbcopy;
